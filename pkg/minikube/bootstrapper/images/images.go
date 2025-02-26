@@ -59,6 +59,15 @@ func essentials(mirror string, v semver.Version) []string {
 	return imgs
 }
 
+func essentialsWorker(mirror string, v semver.Version) []string {
+	imgs := []string{
+		componentImage("kube-proxy", v, mirror),
+		Pause(v, mirror),
+		KindNet(mirror),
+	}
+	return imgs
+}
+
 // componentImage returns a Kubernetes component image to pull
 func componentImage(name string, v semver.Version, mirror string) string {
 	return fmt.Sprintf("%s:v%s", path.Join(kubernetesRepo(mirror), name), v)

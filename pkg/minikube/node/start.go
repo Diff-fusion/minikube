@@ -163,6 +163,13 @@ func Start(starter Starter) (*kubeconfig.Settings, error) { // nolint:gocyclo
 			}()
 		}
 	} else {
+		images, err := images.KubeadmWorker(starter.Cfg.KubernetesConfig.ImageRepository, starter.Cfg.KubernetesConfig.KubernetesVersion)
+		if err != nil {
+			return nil, errors.Wrap(err, "kubeadm images")
+		}
+		if err := machine.LoadCachedImages(starter.Cfg, starter.Runner, images, detect.ImageCacheDir(), false); err != nil {
+			out.FailureT("Unable to load cached images: {{.error}}", out.V{"error": err})
+		}
 		bs, err = cluster.Bootstrapper(starter.MachineAPI, viper.GetString(cmdcfg.Bootstrapper), *starter.Cfg, starter.Runner)
 		if err != nil {
 			return nil, errors.Wrap(err, "Failed to get bootstrapper")

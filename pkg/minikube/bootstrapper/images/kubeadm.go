@@ -40,3 +40,18 @@ func Kubeadm(mirror string, version string) ([]string, error) {
 	imgs = append(imgs, auxiliary(mirror)...)
 	return imgs, nil
 }
+
+func KubeadmWorker(mirror string, version string) ([]string, error) {
+	v, err := semver.Make(strings.TrimPrefix(version, "v"))
+	if err != nil {
+		return nil, errors.Wrap(err, "semver")
+	}
+	if v.Major > 1 {
+		return nil, fmt.Errorf("version too new: %v", v)
+	}
+	if semver.MustParseRange("<1.12.0-alpha.0")(v) {
+		return nil, fmt.Errorf("version too old: %v", v)
+	}
+	imgs := essentialsWorker(mirror, v)
+	return imgs, nil
+}
